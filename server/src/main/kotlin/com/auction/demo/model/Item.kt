@@ -8,18 +8,18 @@ import javax.persistence.Id
 
 
 @Entity
-class Ser {
+class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
     var name: String? = null
-    var producer: String? = null
-    var price = 0.0
+    var description: String? = null
+    var currentPrice = 0.0
 
     internal constructor() {}
-    constructor(name: String?, producer: String?, price: Double) {
+    constructor(name: String?, description: String?, currentPrice: Double) {
         this.name = name
-        this.producer = producer
-        this.price = price
+        this.description = description
+        this.currentPrice = currentPrice
     }
 }
