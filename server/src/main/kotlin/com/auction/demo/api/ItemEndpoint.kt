@@ -1,15 +1,14 @@
 package com.auction.demo.api
 
 import com.auction.demo.model.Item
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.beans.factory.annotation.Autowired
 import com.auction.demo.repository.ItemsRepository
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.http.ResponseEntity
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.util.*
+
 
 @RestController
 class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepository) {
@@ -31,4 +30,47 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
             ResponseEntity.status(HttpStatus.CONFLICT).build<Any>()
         }
     }
+
+    @GetMapping("/items/{id}")
+    fun getTutorialById(@PathVariable("id") id: Long): ResponseEntity<Any?> {
+        val tutorialData: Optional<Item?> = itemsRepository.findById(id)
+        return if (tutorialData.isPresent) {
+            ResponseEntity<Any?>(tutorialData.get(), HttpStatus.OK)
+        } else {
+            ResponseEntity<Any?>(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @PutMapping("/items/{id}")
+    fun updateTutorial(@PathVariable("id") id: Long, @RequestBody newItem: Item): ResponseEntity<Any?> {
+        val tutorialData: Optional<Item?> = itemsRepository.findById(id)
+        return if (tutorialData.isPresent) {
+            val item: Item = tutorialData.get()
+            item.currentPrice = newItem.currentPrice
+            ResponseEntity<Any?>(itemsRepository.save(item), HttpStatus.OK)
+        } else {
+            ResponseEntity<Any?>(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @DeleteMapping("/items/{id}")
+    fun deleteTutorial(@PathVariable("id") id: Long): ResponseEntity<HttpStatus?>? {
+        return try {
+            itemsRepository.deleteById(id)
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } catch (e: Exception) {
+            ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @DeleteMapping("/items")
+    fun deleteAllTutorials(): ResponseEntity<HttpStatus?>? {
+        return try {
+            itemsRepository.deleteAll()
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } catch (e: java.lang.Exception) {
+            ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
 }
