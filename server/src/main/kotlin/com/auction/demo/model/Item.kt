@@ -1,5 +1,6 @@
 package com.auction.demo.model
 
+import java.sql.Timestamp
 import javax.persistence.Entity
 import javax.persistence.GenerationType
 
@@ -14,12 +15,14 @@ class Item {
     var id: Long? = null
     var name: String? = null
     var description: String? = null
+    var category: String? = null
+    var owner: String? = null
+    var image: String? = null
+    var numOfOffers: Int? = 0
+    var payment: String? = null
+    var bestOffer: String? = "Na razie nie ma żadnych ofert"
+    var timeLeft: Int? = 0
     var currentPrice = 0.0
 
-    internal constructor() {}
-    constructor(name: String?, description: String?, currentPrice: Double) {
-        this.name = name
-        this.description = description
-        this.currentPrice = currentPrice
-    }
+
 }

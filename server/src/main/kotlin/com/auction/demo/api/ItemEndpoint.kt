@@ -5,18 +5,23 @@ import com.auction.demo.repository.ItemsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 
+@CrossOrigin(origins = ["*"], maxAge = 3600)
 @RestController
+@RequestMapping("/api")
 class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepository) {
-    @get:GetMapping("/api/items")
+
+    @get:GetMapping("/items")
     val all: List<Item?>
         get() = itemsRepository.findAll()
 
-    @PostMapping("/api/items")
+    @PostMapping("/items")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun save(@RequestBody item: Item): ResponseEntity<*> {
         return if (item.id == null) {
             val saved = itemsRepository.save(item)
@@ -32,6 +37,7 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
     }
 
     @GetMapping("/items/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun getTutorialById(@PathVariable("id") id: Long): ResponseEntity<Any?> {
         val tutorialData: Optional<Item?> = itemsRepository.findById(id)
         return if (tutorialData.isPresent) {
@@ -42,11 +48,13 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
     }
 
     @PutMapping("/items/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun updateTutorial(@PathVariable("id") id: Long, @RequestBody newItem: Item): ResponseEntity<Any?> {
         val tutorialData: Optional<Item?> = itemsRepository.findById(id)
         return if (tutorialData.isPresent) {
             val item: Item = tutorialData.get()
             item.currentPrice = newItem.currentPrice
+            item.numOfOffers = item.numOfOffers?.plus(1)
             ResponseEntity<Any?>(itemsRepository.save(item), HttpStatus.OK)
         } else {
             ResponseEntity<Any?>(HttpStatus.NOT_FOUND)
@@ -54,6 +62,7 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
     }
 
     @DeleteMapping("/items/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun deleteTutorial(@PathVariable("id") id: Long): ResponseEntity<HttpStatus?>? {
         return try {
             itemsRepository.deleteById(id)
@@ -64,6 +73,7 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
     }
 
     @DeleteMapping("/items")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun deleteAllTutorials(): ResponseEntity<HttpStatus?>? {
         return try {
             itemsRepository.deleteAll()
