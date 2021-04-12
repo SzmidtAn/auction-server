@@ -1,17 +1,15 @@
-package com.auction.demo.repository;
+package com.auction.demo.repository
 
-import java.util.Optional;
-
-import com.auction.demo.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
+import com.auction.demo.model.Item
+import com.auction.demo.model.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-
-    Boolean existsByUsername(String username);
-
-    Boolean existsByEmail(String email);
+interface UserRepository : JpaRepository<User?, Long?> {
+    fun findByUsername(username: String?): Optional<User?>?
+    fun findById(id: Long?): Optional<User?>?
+    fun existsByUsername(username: String?): Boolean?
+    fun existsByEmail(email: String?): Boolean?
 }

@@ -1,7 +1,9 @@
 package com.auction.demo.api
 
 import com.auction.demo.model.Item
+import com.auction.demo.model.User
 import com.auction.demo.repository.ItemsRepository
+import com.auction.demo.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,6 +18,10 @@ import java.util.*
 @RequestMapping("/api")
 class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepository) {
 
+    @Autowired
+    var userRepository: UserRepository? = null
+
+
     @get:GetMapping("/items")
     val all: List<Item?>
         get() = itemsRepository.findAll()
@@ -27,6 +33,7 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
             val saved = itemsRepository.save(item)
             val location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
+
                 .path("/{id}")
                 .buildAndExpand(saved.id)
                 .toUri()
@@ -47,6 +54,14 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
         }
     }
 
+
+    @GetMapping("//auth/users/{UserId}")
+    fun getItemsForUser(@PathVariable("UserId") id: Long): ResponseEntity<Any?> {
+        val user: User = userRepository!!.findById(id).get()
+
+        return ResponseEntity<Any?>(user.items, HttpStatus.OK)
+    }
+
     @PutMapping("/items/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     fun updateTutorial(@PathVariable("id") id: Long, @RequestBody newItem: Item): ResponseEntity<Any?> {
@@ -55,7 +70,17 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
             val item: Item = tutorialData.get()
             item.currentPrice = newItem.currentPrice
             item.numOfOffers = item.numOfOffers?.plus(1)
+            item.bestOffer = newItem.bestOffer
+
+            val user: User = userRepository?.findByUsername(newItem.bestOffer)!!.get()
+            val items: MutableSet<Item> = HashSet()
+            items.add(item)
+
+            user.items.add(item)
+
+
             ResponseEntity<Any?>(itemsRepository.save(item), HttpStatus.OK)
+           ResponseEntity<Any?>(userRepository!!.save(user), HttpStatus.OK)
         } else {
             ResponseEntity<Any?>(HttpStatus.NOT_FOUND)
         }
@@ -82,5 +107,6 @@ class ItemEndpoint @Autowired constructor(private val itemsRepository: ItemsRepo
             ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
 
 }

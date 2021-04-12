@@ -22,7 +22,6 @@ class Item {
     var payment: String? = null
     var bestOffer: String? = "Na razie nie ma żadnych ofert"
     var timeLeft: Int? = 0
-    var currentPrice = 0.0
-
+    var currentPrice: Double = 0.0
 
 }
